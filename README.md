@@ -5,6 +5,16 @@ This example uses a JavaScript function that relies on nodejs  and the
 to produce a function that unzips a zipfile, and sends back a JSON
 representation of the contents of the zipfile.
 
+In addition to the original project [GCP-Cloud-Function-Zip-Ops](https://github.com/DinoChiesa/GCP-Cloud-Function-Zip-Ops), this version also accepts a binary payload (in addition to base64 and JSON payloads from the original), as well as a `fileUrl` query parameter that will download the file from a remote server.
+
+```sh
+# local test post binary zip data to function
+curl -i "http://0:8080" -X POST -H "Content-Type: application/zip" --data-binary "@203.zip"
+
+# local test send fileUrl
+curl -i "http://0:8080?fileUrl=https://example.com/data.zip" -X POST
+```
+
 ## How it works
 
 [GCP Cloud Functions](https://cloud.google.com/functions) is an example of a

@@ -38,20 +38,37 @@ const jsonFormat = entry => {
       };
 const invalidRequest = res => res.status(400).type('text/plain').send('invalid request');
 
-functions.http('zip-ops-handler', (req, res) => {
+functions.http('zip-ops-handler', async (req, res) => {
   if ('POST' != req.method) {
     invalidRequest(res);
     return;
   }
 
-  let contents = (req.is('application/json') && req.body.contents) ? req.body.contents : (req.is('text/plain')) ? req.rawBody : null;
+  // Start with binary data, if it was sent
+  let contents = req.rawBody;
+
+  // If the user sent a fileUrl, then download it as a buffer and use that
+  let url = req.query["fileUrl"];
+  if (url) {
+    console.log(url);
+    let fileContents = await fetch(url);
+    contents = Buffer.from(await fileContents.arrayBuffer());
+  }
+
+  // If the content-type is JSON or text, decode to a buffer
+  if (req.is('application/json')) {
+    contents = base64Decode(req.body.contents);
+  }
+  else if (req.is('text/plain')) {
+    contents = base64Decode(req.rawBody);
+  }
 
   if ( ! contents) {
     invalidRequest(res);
     return;
   }
 
-  const result = new AdmZip(base64Decode(contents)).getEntries().map(jsonFormat);
+  const result = new AdmZip(contents).getEntries().map(jsonFormat);
   res.send({result});
 
 });
