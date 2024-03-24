@@ -5,4 +5,5 @@ gcloud functions deploy $NAME \
   --region=europe-west1 \
   --source=. \
   --entry-point=$HANDLER \
-  --trigger-http
+  --trigger-http \
+  --no-allow-unauthenticated
